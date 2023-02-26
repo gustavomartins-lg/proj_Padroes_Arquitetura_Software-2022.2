@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">ARApp</string>
+    <string name="paciente">Paciente:</string>
+    <string name="situa_o">Situação:</string>
+    <string name="queixa">Queixa:</string>
+    <string name="nivel_de_prioridade">nivel de prioridade</string>
+</resources>
