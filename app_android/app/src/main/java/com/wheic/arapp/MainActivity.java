@@ -73,18 +73,9 @@ public class MainActivity extends AppCompatActivity {
                                 builder.setMessage("Somthing is not right" + throwable.getMessage()).show();
                                 return null;
                             });
-
                 }
-
             });
-
-        } else {
-
-            return;
-
         }
-
-
     }
 
     private void addModel(Anchor anchor, ModelRenderable modelRenderable) {
