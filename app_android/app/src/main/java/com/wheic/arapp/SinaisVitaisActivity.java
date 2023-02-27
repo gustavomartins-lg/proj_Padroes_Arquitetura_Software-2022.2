@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -31,13 +32,14 @@ import io.grpc.examples.iotservice.SensorServiceGrpc;
 import io.grpc.stub.MetadataUtils;
 
 public class SinaisVitaisActivity extends AppCompatActivity {
-    private static final String HOST = "146.148.42.190";
+    private static final String HOST = "34.27.5.131";
     private static final int PORT = 50051;
     private TextView nomePaciente, situacaoPaciente, queixaPaciente;
     private TextView dadoVital1, dadoVital2, dadoVital3;
     private ImageView prioridadePaciente;
     private ImageButton arButton;
     private Button remedio1Btn, remedio2Btn;
+    private int estadoAtualRemedio1, estadoAtualRemedio2;
 
     private Paciente paciente;
 
@@ -79,7 +81,7 @@ public class SinaisVitaisActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(SinaisVitaisActivity.this, MainActivity.class);
+                Intent intent = new Intent((Context) SinaisVitaisActivity.this, MainActivity.class);
                 startActivity(intent);
             }
         });
@@ -99,23 +101,32 @@ public class SinaisVitaisActivity extends AppCompatActivity {
         consultarEstadoMedicacao("remedio2");
 
         remedio1Btn.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View view) {
-                aplicarMedicamento("remedio1", 1);
+                aplicarMedicamento("remedio1", novoEstado(estadoAtualRemedio1));
             }
         });
         remedio2Btn.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View view) {
-                aplicarMedicamento("remedio2", 1);
+                aplicarMedicamento("remedio2", novoEstado(estadoAtualRemedio2));
             }
         });
     }
 
     private void consultarEstadoMedicacao(String medicamento) {
         new GrpcTaskConsultaEstadMedicacao(this).execute("ambulancia", medicamento);
+    }
+
+    private int novoEstado(int estadoAtual){
+        //se o estado atual for igual a 0, então o novo estado é 1
+        if(estadoAtual == 0){
+            return 1;
+        }
+        //se o estado atual for igual a 1, então o novo estado é 0
+        else{
+            return 0;
+        }
     }
 
     private void alterarEstadoMedicacao(String resultado) {
@@ -128,13 +139,15 @@ public class SinaisVitaisActivity extends AppCompatActivity {
                 } else{
                     remedio1Btn.setBackgroundColor(getApplicationContext().getResources().getColor(R.color.verde));
                 }
+                estadoAtualRemedio1 = Integer.parseInt(dados[1]);
                 break;
             case "remedio2":
                 if(dados[1].equals("1")) {
                     remedio2Btn.setBackgroundColor(getApplicationContext().getResources().getColor(R.color.vermelha));
                 }else{
-                    remedio1Btn.setBackgroundColor(getApplicationContext().getResources().getColor(R.color.verde));
+                    remedio2Btn.setBackgroundColor(getApplicationContext().getResources().getColor(R.color.verde));
                 }
+                estadoAtualRemedio2 = Integer.parseInt(dados[1]);
                 break;
             default:
                 break;
@@ -151,7 +164,7 @@ public class SinaisVitaisActivity extends AppCompatActivity {
     }
 
     private void preencherMonitorDadosVitais(String resultado) {
-        String[] dados = resultado.split("|");
+        String[] dados = resultado.split(":");
 
         switch (dados[0].toLowerCase()) {
             case "sensor de temperatura":
@@ -314,6 +327,7 @@ public class SinaisVitaisActivity extends AppCompatActivity {
                 stub = MetadataUtils.attachHeaders(stub, metadata);
                 //stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata));
                 ListaLedStatus resposta = stub.listarLeds(ledStatus);
+
 
                 return resposta.getStatus(0).getNomeDispositivo()+ ":" + resposta.getStatus(0).getEstado();
 
