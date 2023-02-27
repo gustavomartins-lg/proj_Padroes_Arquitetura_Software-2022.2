@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -23,6 +24,8 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.Metadata;
 import io.grpc.examples.iotservice.Dado;
+import io.grpc.examples.iotservice.LedStatus;
+import io.grpc.examples.iotservice.ListaLedStatus;
 import io.grpc.examples.iotservice.Parametros;
 import io.grpc.examples.iotservice.SensorServiceGrpc;
 import io.grpc.stub.MetadataUtils;
@@ -30,10 +33,12 @@ import io.grpc.stub.MetadataUtils;
 public class SinaisVitaisActivity extends AppCompatActivity {
     private static final String HOST = "146.148.42.190";
     private static final int PORT = 50051;
-    public TextView nomePaciente, situacaoPaciente, queixaPaciente;
+    private TextView nomePaciente, situacaoPaciente, queixaPaciente;
     private TextView dadoVital1, dadoVital2, dadoVital3;
-    public ImageView prioridadePaciente;
-    public ImageButton arButton;
+    private ImageView prioridadePaciente;
+    private ImageButton arButton;
+    private Button remedio1Btn, remedio2Btn;
+
     private Paciente paciente;
 
     @SuppressLint({"MissingInflatedId", "UseCompatLoadingForDrawables"})
@@ -86,6 +91,59 @@ public class SinaisVitaisActivity extends AppCompatActivity {
         consultarDados("sensor de temperatura");
         consultarDados("sensor de umidade");
         consultarDados("sensor de luminosidade");
+
+        remedio1Btn = (Button) findViewById(R.id.remedio1Button);
+        remedio2Btn = (Button) findViewById(R.id.remedio2Button);
+
+        consultarEstadoMedicacao("remedio1");
+        consultarEstadoMedicacao("remedio2");
+
+        remedio1Btn.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+                aplicarMedicamento("remedio1", 1);
+            }
+        });
+        remedio2Btn.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+                aplicarMedicamento("remedio2", 1);
+            }
+        });
+    }
+
+    private void consultarEstadoMedicacao(String medicamento) {
+        new GrpcTaskConsultaEstadMedicacao(this).execute("ambulancia", medicamento);
+    }
+
+    private void alterarEstadoMedicacao(String resultado) {
+        String[] dados = resultado.split(":");
+
+        switch (dados[0]) {
+            case "remedio1":
+                if(dados[1].equals("1")) {
+                    remedio1Btn.setBackgroundColor(getApplicationContext().getResources().getColor(R.color.vermelha));
+                } else{
+                    remedio1Btn.setBackgroundColor(getApplicationContext().getResources().getColor(R.color.verde));
+                }
+                break;
+            case "remedio2":
+                if(dados[1].equals("1")) {
+                    remedio2Btn.setBackgroundColor(getApplicationContext().getResources().getColor(R.color.vermelha));
+                }else{
+                    remedio1Btn.setBackgroundColor(getApplicationContext().getResources().getColor(R.color.verde));
+                }
+                break;
+            default:
+                break;
+        }
+
+    }
+
+    private void aplicarMedicamento(String medicamento, int estado) {
+        new GrpcTaskAplicaMedicacao(this).execute("ambulancia", medicamento, Integer.toString(estado));
     }
 
     private void consultarDados(String nomedispositivo) {
@@ -136,11 +194,11 @@ public class SinaisVitaisActivity extends AppCompatActivity {
                 channel = ManagedChannelBuilder.forAddress(HOST, PORT).usePlaintext().build();
                 SensorServiceGrpc.SensorServiceBlockingStub stub = SensorServiceGrpc.newBlockingStub(channel);
                 Parametros parametros = Parametros.newBuilder().setLocalizacao(localizacao).setNomeDispositivo(nomeDispositivo).build();
-                //stub = MetadataUtils.attachHeaders(stub, new Metadata());
-                stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata));
+                stub = MetadataUtils.attachHeaders(stub, metadata);
+                //stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata));
                 Dado resposta = stub.consultarUltimaLeituraSensor(parametros);
 
-                return resposta.getNomeDispositivo() + "|" + resposta.getValor();
+                return resposta.getNomeDispositivo() + ":" + resposta.getValor();
 
             } catch (Exception e){
                 StringWriter sw = new StringWriter();
@@ -164,6 +222,123 @@ public class SinaisVitaisActivity extends AppCompatActivity {
             }
             if (activity instanceof SinaisVitaisActivity) {
                 ((SinaisVitaisActivity) activity).preencherMonitorDadosVitais(result);
+            }
+        }
+    }
+
+    private static class GrpcTaskAplicaMedicacao extends AsyncTask<String, Void, String> {
+        private final WeakReference<Activity> activityReference;
+        private ManagedChannel channel;
+
+
+        private GrpcTaskAplicaMedicacao(Activity activity) {
+            this.activityReference = new WeakReference<Activity>(activity);
+        }
+
+        @Override
+        protected String doInBackground(String... params) {
+            String localizacao = params[0];
+            String nomeDispositivo = params[1];
+            int estado = Integer.parseInt(params[2]);
+
+            Metadata.Key<String> usuarioKey = Metadata.Key.of("username", ASCII_STRING_MARSHALLER);
+            Metadata.Key<String> senhaKey = Metadata.Key.of("password", ASCII_STRING_MARSHALLER);
+            Metadata metadata = new Metadata();
+
+            // Adicionando um valor para a chave criada na metadata
+            metadata.put(usuarioKey, "ariel");
+            metadata.put(senhaKey, "senha123456");
+
+            try {
+                channel = ManagedChannelBuilder.forAddress(HOST, PORT).usePlaintext().build();
+                SensorServiceGrpc.SensorServiceBlockingStub stub = SensorServiceGrpc.newBlockingStub(channel);
+                LedStatus ledStatus = LedStatus.newBuilder().setLocalizacao(localizacao).setNomeDispositivo(nomeDispositivo).setEstado(estado).build();
+                stub = MetadataUtils.attachHeaders(stub, metadata);
+                //stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata));
+                LedStatus resposta = stub.acionarLed(ledStatus);
+
+                return resposta.getNomeDispositivo() + ":" + resposta.getEstado();
+
+            } catch (Exception e){
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw);
+                e.printStackTrace(pw);
+                pw.flush();
+                return String.format("Failed... : %n%s", sw);
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            try {
+                channel.shutdown().awaitTermination(1, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            Activity activity = activityReference.get();
+            if (activity == null) {
+                return;
+            }
+            if (activity instanceof SinaisVitaisActivity) {
+                ((SinaisVitaisActivity) activity).alterarEstadoMedicacao(result);
+            }
+        }
+    }
+
+    private static class GrpcTaskConsultaEstadMedicacao extends AsyncTask<String, Void, String> {
+        private final WeakReference<Activity> activityReference;
+        private ManagedChannel channel;
+
+
+        private GrpcTaskConsultaEstadMedicacao(Activity activity) {
+            this.activityReference = new WeakReference<Activity>(activity);
+        }
+
+        @Override
+        protected String doInBackground(String... params) {
+            String localizacao = params[0];
+            String nomeDispositivo = params[1];
+
+            Metadata.Key<String> usuarioKey = Metadata.Key.of("username", ASCII_STRING_MARSHALLER);
+            Metadata.Key<String> senhaKey = Metadata.Key.of("password", ASCII_STRING_MARSHALLER);
+            Metadata metadata = new Metadata();
+
+            // Adicionando um valor para a chave criada na metadata
+            metadata.put(usuarioKey, "ariel");
+            metadata.put(senhaKey, "senha123456");
+
+            try {
+                channel = ManagedChannelBuilder.forAddress(HOST, PORT).usePlaintext().build();
+                SensorServiceGrpc.SensorServiceBlockingStub stub = SensorServiceGrpc.newBlockingStub(channel);
+                LedStatus ledStatus = LedStatus.newBuilder().setLocalizacao(localizacao).setNomeDispositivo(nomeDispositivo).build();
+                stub = MetadataUtils.attachHeaders(stub, metadata);
+                //stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata));
+                ListaLedStatus resposta = stub.listarLeds(ledStatus);
+
+                return resposta.getStatus(0).getNomeDispositivo()+ ":" + resposta.getStatus(0).getEstado();
+
+            } catch (Exception e){
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw);
+                e.printStackTrace(pw);
+                pw.flush();
+                return String.format("Failed... : %n%s", sw);
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            try {
+                channel.shutdown().awaitTermination(1, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            Activity activity = activityReference.get();
+            if (activity == null) {
+                return;
+            }
+            if (activity instanceof SinaisVitaisActivity) {
+                ((SinaisVitaisActivity) activity).alterarEstadoMedicacao(result);
             }
         }
     }
