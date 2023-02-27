@@ -164,7 +164,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="15dp"
-                        android:text="Dado vital 1"
+                        android:text="Buscando..."
                         android:textColor="@color/black"
                         android:textSize="16sp" />
                 </LinearLayout>
@@ -187,7 +187,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="15dp"
-                        android:text="Dado vital 1"
+                        android:text="Buscando..."
                         android:textColor="@color/black"
                         android:textSize="16sp" />
                 </LinearLayout>
@@ -209,7 +209,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="15dp"
-                        android:text="Dado vital 3"
+                        android:text="Buscando..."
                         android:textColor="@color/black"
                         android:textSize="16sp" />
                 </LinearLayout>

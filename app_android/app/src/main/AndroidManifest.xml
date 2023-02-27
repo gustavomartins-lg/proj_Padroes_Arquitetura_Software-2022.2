@@ -3,6 +3,7 @@
     package="com.wheic.arapp">
 
     <uses-permission android:name="android.permission.CAMERA" /> <!-- This helps to permit the user to access Camera -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <uses-feature
         android:glEsVersion="0x00030000"
         android:required="true" /> <!-- This helps to check a specific feature in the phone's hardware, here it is OpenGl ES version 3 -->

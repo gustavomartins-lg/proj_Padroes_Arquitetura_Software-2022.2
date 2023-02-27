@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.os.Bundle;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 public class ListaPacientesActivity extends AppCompatActivity implements RecyclerViewInterface {
@@ -24,10 +25,13 @@ public class ListaPacientesActivity extends AppCompatActivity implements Recycle
 
     private void mockDeviceList() {
         pacientes = new ArrayList<>();
-        pacientes.add(new Paciente("Maria", "em espera", "dor de barriga", 4));
-        pacientes.add(new Paciente("Joao", "em atendimento", "facada no peito", 1));
-        pacientes.add(new Paciente("Carlos", "em espera", "dor forte no peito", 2));
-        pacientes.add(new Paciente("Carla", "Em atendimento", "covid", 3));
+        pacientes.add(new Paciente("Maria Carvalho Freitas", "Em espera", "Dor de barriga", 4));
+        pacientes.add(new Paciente("João Paulo Souza", "Transferência de hospital", "Facada no peito", 1));
+        pacientes.add(new Paciente("Carlos Andrade Silva", "Em espera", "Dor forte no peito", 2));
+        pacientes.add(new Paciente("Carla de Jesus Costa", "Em atendimento", "Covid", 3));
+        pacientes.add(new Paciente("Matheus Freitas Lima", "UTI", "Acidente de transito", 1));
+        pacientes.add(new Paciente("Maria Aparecida Lima", "UTI", "Acidente de transito", 1));
+        pacientes.add(new Paciente("Caio Henrique Teles", "Em espera", "Fratura na mão", 2));
     }
 
     @Override
