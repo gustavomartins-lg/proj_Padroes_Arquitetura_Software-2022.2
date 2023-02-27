@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -19,7 +20,7 @@ public class ListaPacientesActivity extends AppCompatActivity implements Recycle
 
         RecyclerView recyclerViewDeviceList = findViewById(R.id.recyclerview_pacientes);
         mockDeviceList();
-        recyclerViewDeviceList.setLayoutManager(new LinearLayoutManager(this));
+        recyclerViewDeviceList.setLayoutManager(new LinearLayoutManager((Context) this));
         recyclerViewDeviceList.setAdapter(new PacienteListAdapter(this, pacientes, this));
     }
 
@@ -36,7 +37,7 @@ public class ListaPacientesActivity extends AppCompatActivity implements Recycle
 
     @Override
     public void onRecyclerViewItemClick(int position) {
-        Intent intent = new Intent(ListaPacientesActivity.this, SinaisVitaisActivity.class);
+        Intent intent = new Intent((Context) ListaPacientesActivity.this, SinaisVitaisActivity.class);
         intent.putExtra("NOME_PACIENTE", pacientes.get(position).getNome());
         intent.putExtra("SITUACAO_PACIENTE", pacientes.get(position).getSituacao());
         intent.putExtra("QUEIXA_PACIENTE", pacientes.get(position).getQueixa());

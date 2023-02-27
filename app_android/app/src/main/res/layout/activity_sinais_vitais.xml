@@ -155,7 +155,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Dado vital 1:"
+                        android:text="Temperatura:"
                         android:textColor="@color/black"
                         android:textSize="16sp" />
 
@@ -163,7 +163,7 @@
                         android:id="@+id/dadoVital1TextView"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="15dp"
+                        android:layout_marginStart="27dp"
                         android:text="Buscando..."
                         android:textColor="@color/black"
                         android:textSize="16sp" />
@@ -178,7 +178,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Dado vital 2:"
+                        android:text="Freq. Cardiaca:"
                         android:textColor="@color/black"
                         android:textSize="16sp" />
 
@@ -200,7 +200,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Dado vital 3:"
+                        android:text="Oxigenação:"
                         android:textColor="@color/black"
                         android:textSize="16sp" />
 
@@ -208,7 +208,7 @@
                         android:id="@+id/dadoVital3TextView"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="15dp"
+                        android:layout_marginStart="34dp"
                         android:text="Buscando..."
                         android:textColor="@color/black"
                         android:textSize="16sp" />
