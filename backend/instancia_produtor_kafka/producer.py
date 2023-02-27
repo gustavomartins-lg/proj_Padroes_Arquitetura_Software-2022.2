@@ -111,7 +111,8 @@ def consume_led_command():
         estado = int(msg.value.decode())
         led = decodeMessage(msg.key.decode())
         ledpin = getPinoPorNomeELocalizacao(led['localizacao'], led['nomeDispositivo'])
-        rodarComandoLED(ledpin, estado)
+        print("LED: " + str(led['nomeDispositivo']) + " teve seu estado alterado!") 
+        #rodarComandoLED(ledpin, estado)
 
 def lerUmidadeTemperatura(pin: int):
     try:
@@ -166,11 +167,14 @@ def gerarDado(tipoSensor : int, localizacao : str, nomeDispositivo: str, pinoSen
     data = datetime.now()
     valor = None
     if tipoSensor == 2:
-        valor = lerUmidadeTemperatura(pinoSensor)[0]
+        valor = random.random(30.0, 42.0)
+        #valor = lerUmidadeTemperatura(pinoSensor)[0]
     elif tipoSensor == 3:
-        valor = lerUmidadeTemperatura(pinoSensor)[1]
+        valor = random.randomint(50, 160)  
+        #valor = lerUmidadeTemperatura(pinoSensor)[1]
     elif tipoSensor == 4:
-        valor = lerLuminosidade(pinoSensor)
+        valor = random.randomint(0, 100)  
+        #valor = lerLuminosidade(pinoSensor)
     valor = float(valor) if valor is not None else None
     dado = {
         "data": data.strftime("%d/%m/%Y %H:%M:%S"),
@@ -183,7 +187,7 @@ def gerarDado(tipoSensor : int, localizacao : str, nomeDispositivo: str, pinoSen
 
 if __name__ == '__main__':
     cadastrarDispositivos()
-    iniciarGPIO()
+    #iniciarGPIO()
     trd =threading.Thread(target=consume_led_command)
     trd.start()
 
