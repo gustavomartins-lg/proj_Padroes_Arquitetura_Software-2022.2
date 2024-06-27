@@ -6,9 +6,9 @@ from const import *
 import json
 import sys
 import threading
-#import board
-#import adafruit_dht
-#import RPi.GPIO as GPIO # Import Raspberry Pi GPIO library
+import board
+import adafruit_dht
+import RPi.GPIO as GPIO # Import Raspberry Pi GPIO library
 
 
 """
@@ -79,21 +79,21 @@ loc_disp = [
     }
 ]
 
-#dhtDevice = adafruit_dht.DHT22(4)
+dhtDevice = adafruit_dht.DHT22(4)
 producer = KafkaProducer(bootstrap_servers=[BROKER_ADDR + ':' + BROKER_PORT])
 
 def decodeMessage(msg : str):
     dados = json.loads(msg)
     return dados
 
-#def iniciarGPIO():
-    # Initialize GPIO
-    #GPIO.setwarnings(False) # Ignore warning for now
-    #for info in leds:
-        #GPIO.setup(info['pin'], GPIO.OUT, initial=(GPIO.LOW if info['estado'] == False else GPIO.HIGH))
+def iniciarGPIO():
+    #Initialize GPIO
+    GPIO.setwarnings(False) # Ignore warning for now
+    for info in leds:
+        GPIO.setup(info['pin'], GPIO.OUT, initial=(GPIO.LOW if info['estado'] == False else GPIO.HIGH))
 
-#def rodarComandoLED(ledpin: int, estado: int):
-    #GPIO.output(ledpin, GPIO.HIGH if estado == 1 else GPIO.LOW)
+def rodarComandoLED(ledpin: int, estado: int):
+    GPIO.output(ledpin, GPIO.HIGH if estado == 1 else GPIO.LOW)
 
 def getPinoPorNomeELocalizacao(localizacao: str, nomeDispositivo: str):
     for local in loc_disp:
@@ -115,15 +115,15 @@ def consume_led_command():
             print("O " + str(led['nomeDispositivo']) + " está sendo aplicado!")
         else:
             print("O " + str(led['nomeDispositivo']) + " foi interrompido!")
-        #rodarComandoLED(ledpin, estado)
+        rodarComandoLED(ledpin, estado)
 
 def lerUmidadeTemperatura(pin: int):
     try:
-        temperatura_c = round(random.uniform(28.00, 42.00), 2)
-        umidade = random.randint(50, 160)
+        #temperatura_c = round(random.uniform(28.00, 42.00), 2)
+        #umidade = random.randint(50, 160)
 
-        #temperatura_c = dhtDevice.temperature
-        #umidade = dhtDevice.humidity
+        temperatura_c = dhtDevice.temperature
+        umidade = dhtDevice.humidity
         
         return temperatura_c, umidade
     except RuntimeError as error:
@@ -131,7 +131,7 @@ def lerUmidadeTemperatura(pin: int):
         print(error.args[0])
         return None, None
     except Exception as error:
-        #dhtDevice.exit()
+        dhtDevice.exit()
         raise error
 
 def cadastrarDispositivos():
@@ -150,23 +150,23 @@ def getTodosSensoresCadastrados():
 def rc_time(pin_to_circuit: int):
     count = 0
   
-    #Output on the pin for 
-    #GPIO.setup(pin_to_circuit, GPIO.OUT)
-    #GPIO.output(pin_to_circuit, GPIO.LOW)
+    # Output on the pin for 
+    GPIO.setup(pin_to_circuit, GPIO.OUT)
+    GPIO.output(pin_to_circuit, GPIO.LOW)
     time.sleep(0.1)
 
-    #Change the pin back to input
-    #GPIO.setup(pin_to_circuit, GPIO.IN)
+    # Change the pin back to input
+    GPIO.setup(pin_to_circuit, GPIO.IN)
   
-    #Count until the pin goes high
-    #while (GPIO.input(pin_to_circuit) == GPIO.LOW):
-    #    count += 1
+    # Count until the pin goes high
+    while (GPIO.input(pin_to_circuit) == GPIO.LOW):
+        count += 1
 
     return count
 
 def lerLuminosidade(pin_to_circuit: int):
-    light_level = round(random.uniform(1.00, 100.00), 2)
-    #light_level = rc_time(pin_to_circuit)
+    #light_level = round(random.uniform(1.00, 100.00), 2)
+    light_level = rc_time(pin_to_circuit)
     return light_level
 
 
@@ -191,7 +191,7 @@ def gerarDado(tipoSensor : int, localizacao : str, nomeDispositivo: str, pinoSen
 
 if __name__ == '__main__':
     cadastrarDispositivos()
-    #iniciarGPIO()
+    iniciarGPIO()
     trd =threading.Thread(target=consume_led_command)
     trd.start()
 
